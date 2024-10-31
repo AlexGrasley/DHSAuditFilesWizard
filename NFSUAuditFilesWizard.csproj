@@ -11,6 +11,28 @@
     <ItemGroup>
       <PackageReference Include="itext7" Version="8.0.5" />
       <PackageReference Include="itext7.bouncy-castle-adapter" Version="8.0.5" />
+      <PackageReference Include="Material.Icons.WPF" Version="2.1.10" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Page Update="Screens\MainWindow.xaml">
+        <Generator>MSBuild:Compile</Generator>
+        <XamlRuntime>Wpf</XamlRuntime>
+        <SubType>Designer</SubType>
+      </Page>
+      <Page Remove="Test Data\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Test Data\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Test Data\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Test Data\**" />
     </ItemGroup>
 
 </Project>

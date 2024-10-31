@@ -1,0 +1,95 @@
+﻿<Window x:Class="NFSUAuditFilesWizard.Screens.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="NFSU Audit Files Wizard" Height="450" Width="800">
+    <Window.Resources>
+        <Style x:Key="RoundedTextBox" TargetType="TextBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="10">
+                            <ScrollViewer x:Name="PART_ContentHost"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="RoundedButton" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="0"
+                            CornerRadius="10">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid
+        Background="Black">
+        <ProgressBar x:Name="ProgressBar" Height="30" VerticalAlignment="Top" Margin="10"/>
+        <StackPanel
+            Width="300"
+            VerticalAlignment="Center">
+            <Button
+                Content="Select Folders"
+                FontSize="16"
+                FontWeight="Bold"
+                Foreground="Azure"
+                ClipToBounds="True"
+                Height="30"
+                Width="150"
+                Background="DimGray"
+                Style="{StaticResource RoundedButton}"
+                HorizontalAlignment="Left"
+                Click="OnSelectFoldersClick"
+                />
+            <StackPanel>
+                <Label
+                    Content="Master File Name"
+                    Height="24"
+                    Margin="0,10,0,0"
+                    Foreground="Azure"
+                    />
+                <TextBox
+                    Name="MasterFileNameTextBox"
+                    Margin="0,0,0,15"
+                    Style="{StaticResource RoundedTextBox}"
+                    Height="30"
+                    Width="300"
+                    MaxLength="256"
+                    TabIndex="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    TextAlignment="Center"
+                    Background="Azure"
+                />
+            </StackPanel>
+        <Button
+            Content="start"
+            ClipToBounds="True"
+            Height="30"
+            Width="80"
+            FontSize="16"
+            FontWeight="Bold"
+            Foreground="Azure"
+            Background="DarkGreen"
+            Style="{StaticResource RoundedButton}"
+            HorizontalAlignment="Right"
+            Click="OnStartClick"
+            />
+        </StackPanel>
+    </Grid>
+</Window>
