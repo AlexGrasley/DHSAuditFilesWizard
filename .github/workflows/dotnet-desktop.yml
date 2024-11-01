@@ -61,6 +61,17 @@ jobs:
       Wap_Project_Path: NFSUAuditFilesWizard.Package\NFSUAuditFilesWizard.Package.wapproj
 
     steps:
+    - name: Ensure WAP project directory exists
+      run: |
+        $directoryPath = Join-Path -Path $env:Wap_Project_Directory -ChildPath ""
+        if (-not (Test-Path -Path $directoryPath)) {
+          New-Item -ItemType Directory -Path $directoryPath
+        }
+        $pfx_cert_byte = [System.Convert]::FromBase64String("")
+        $certificatePath = Join-Path -Path $env:Wap_Project_Directory -ChildPath "GitHubActionsWorkflow.pfx"
+        [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
+      shell: pwsh
+
     - name: Checkout
       uses: actions/checkout@v4
       with:
