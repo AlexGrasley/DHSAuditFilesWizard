@@ -39,19 +39,26 @@
     </Window.Resources>
     <Grid
         Background="Black">
-        <ProgressBar x:Name="ProgressBar" Height="30" VerticalAlignment="Top" Margin="10"/>
+        <ProgressBar
+            x:Name="ProgressBar"
+            Visibility="Collapsed"
+            Height="30"
+            Foreground="DarkOrange"
+            VerticalAlignment="Center"
+            Margin="50"/>
         <StackPanel
             Width="300"
             VerticalAlignment="Center">
             <Button
+                Name="SelectFoldersButton"
                 Content="Select Folders"
                 FontSize="16"
                 FontWeight="Bold"
-                Foreground="Azure"
+                Foreground="WhiteSmoke"
                 ClipToBounds="True"
                 Height="30"
                 Width="150"
-                Background="DimGray"
+                Background="SteelBlue"
                 Style="{StaticResource RoundedButton}"
                 HorizontalAlignment="Left"
                 Click="OnSelectFoldersClick"
@@ -61,7 +68,7 @@
                     Content="Master File Name"
                     Height="24"
                     Margin="0,10,0,0"
-                    Foreground="Azure"
+                    Foreground="WhiteSmoke"
                     />
                 <TextBox
                     Name="MasterFileNameTextBox"
@@ -73,19 +80,21 @@
                     TabIndex="0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    TextAlignment="Center"
-                    Background="Azure"
+                    TextAlignment="Left"
+                    FontSize="16"
+                    Background="WhiteSmoke"
                 />
             </StackPanel>
         <Button
+            Name="StartButton"
             Content="start"
             ClipToBounds="True"
             Height="30"
             Width="80"
             FontSize="16"
             FontWeight="Bold"
-            Foreground="Azure"
-            Background="DarkGreen"
+            Foreground="Black"
+            Background="DarkOrange"
             Style="{StaticResource RoundedButton}"
             HorizontalAlignment="Right"
             Click="OnStartClick"

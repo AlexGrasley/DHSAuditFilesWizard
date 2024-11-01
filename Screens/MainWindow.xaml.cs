@@ -54,9 +54,7 @@ public partial class MainWindow : Window
         var parentDirectory = Path.GetDirectoryName(fullPath);
         var masterFileName = MasterFileNameTextBox.Text;
 
-        ProgressBar.Visibility = Visibility.Visible;
-        ProgressBar.IsIndeterminate = false;
-        ProgressBar.Value = 0;
+        ShowProgress();
 
         try
         {
@@ -73,7 +71,19 @@ public partial class MainWindow : Window
             ShowMessageBox(ex.Message, "Error", MessageBoxImage.Error, true);
         }
 
+        HideProgress();
+    }
+
+    private void HideProgress()
+    {
         ProgressBar.Visibility = Visibility.Collapsed;
+    }
+
+    private void ShowProgress()
+    {
+        ProgressBar.Visibility = Visibility.Visible;
+        ProgressBar.IsIndeterminate = false;
+        ProgressBar.Value = 0;
     }
 
     private bool InputsAreValid()
