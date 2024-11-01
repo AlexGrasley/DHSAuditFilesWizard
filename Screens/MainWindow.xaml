@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="NFSU Audit Files Wizard" Height="450" Width="800">
+        Title="NFSU Audit Files Wizard" Height="250" Width="400">
     <Window.Resources>
         <Style x:Key="RoundedTextBox" TargetType="TextBox">
             <Setter Property="Template">

@@ -69,14 +69,18 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             ShowMessageBox(ex.Message, "Error", MessageBoxImage.Error, true);
+            return;
         }
 
-        HideProgress();
+        ShowMessageBox("Done","", MessageBoxImage.None, hideProgressBar: true);
     }
 
     private void HideProgress()
     {
         ProgressBar.Visibility = Visibility.Collapsed;
+        SelectFoldersButton.IsEnabled = true;
+        StartButton.IsEnabled = true;
+        MasterFileNameTextBox.IsEnabled = true;
     }
 
     private void ShowProgress()
@@ -84,6 +88,9 @@ public partial class MainWindow : Window
         ProgressBar.Visibility = Visibility.Visible;
         ProgressBar.IsIndeterminate = false;
         ProgressBar.Value = 0;
+        SelectFoldersButton.IsEnabled = false;
+        StartButton.IsEnabled = false;
+        MasterFileNameTextBox.IsEnabled = false;
     }
 
     private bool InputsAreValid()
@@ -117,8 +124,8 @@ public partial class MainWindow : Window
     private void ShowMessageBox(string message, string caption, MessageBoxImage icon, bool hideProgressBar = false)
     {
         MessageBox.Show(message, caption, MessageBoxButton.OK, icon);
-        ProgressBar.Visibility = hideProgressBar
-            ? Visibility.Collapsed
-            : ProgressBar.Visibility;
+
+        if (hideProgressBar)
+            HideProgress();
     }
 }
