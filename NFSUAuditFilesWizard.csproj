@@ -6,12 +6,16 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
+        <PublishSingleFile>true</PublishSingleFile>
+        <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="itext7" Version="8.0.5" />
       <PackageReference Include="itext7.bouncy-castle-adapter" Version="8.0.5" />
       <PackageReference Include="Material.Icons.WPF" Version="2.1.10" />
+      <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="9.0.0-rc.2.24473.5" />
     </ItemGroup>
 
     <ItemGroup>
