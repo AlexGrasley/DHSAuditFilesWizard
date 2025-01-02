@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="NFSU Audit Files Wizard" Height="250" Width="400">
+        Title="NFSU Audit Files Wizard" Height="550" Width="700">
     <Window.Resources>
         <Style x:Key="RoundedTextBox" TargetType="TextBox">
             <Setter Property="Template">
@@ -36,22 +36,22 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
     <Grid
-        Background="Black">
-        <ProgressBar
-            x:Name="ProgressBar"
-            Visibility="Collapsed"
-            Height="30"
-            Foreground="DarkOrange"
-            VerticalAlignment="Center"
-            Margin="50"/>
+        Background="GhostWhite">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
         <StackPanel
+            Grid.Column="0"
             Width="300"
-            VerticalAlignment="Center">
+            VerticalAlignment="Top">
             <Button
-                Name="SelectFoldersButton"
-                Content="Select Folders"
+                Name="SelectSaveFolderButton"
+                Margin="0,10,0,10"
+                Content="Save Loc"
                 FontSize="16"
                 FontWeight="Bold"
                 Foreground="WhiteSmoke"
@@ -62,42 +62,96 @@
                 Style="{StaticResource RoundedButton}"
                 HorizontalAlignment="Left"
                 Click="OnSelectFoldersClick"
-                />
-            <StackPanel>
+            />
+            <StackPanel
+                Orientation="Horizontal">
+                <Label
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Content="Include Master File"
+                    />
+                <CheckBox
+                    x:Name="IncludeMasterCheckBox"
+                    Margin="5"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    IsChecked="{Binding _includeMaster}"/>
+            </StackPanel>
+            <StackPanel
+                x:Name="MasterFileStackPanel"
+                Visibility="{Binding IsChecked, ElementName=IncludeMasterCheckBox, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Label
                     Content="Master File Name"
                     Height="24"
-                    Margin="0,10,0,0"
-                    Foreground="WhiteSmoke"
-                    />
+                    Margin="0"
+                    Padding="0"
+                    Foreground="Black"
+                    HorizontalAlignment="Left"
+                />
                 <TextBox
                     Name="MasterFileNameTextBox"
-                    Margin="0,0,0,15"
+                    Margin="0"
                     Style="{StaticResource RoundedTextBox}"
                     Height="30"
-                    Width="300"
+                    Width="250"
                     MaxLength="256"
                     TabIndex="0"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
                     TextAlignment="Left"
                     FontSize="16"
                     Background="WhiteSmoke"
                 />
             </StackPanel>
-        <Button
-            Name="StartButton"
-            Content="start"
-            ClipToBounds="True"
-            Height="30"
-            Width="80"
-            FontSize="16"
-            FontWeight="Bold"
-            Foreground="Black"
-            Background="DarkOrange"
-            Style="{StaticResource RoundedButton}"
-            HorizontalAlignment="Right"
-            Click="OnStartClick"
+        </StackPanel>
+        <StackPanel
+            Grid.Column="1"
+            Margin="0"
+            Width="350"
+            HorizontalAlignment="Left">
+            <Label
+                HorizontalAlignment="Left"
+                Padding="10,5,5,5"
+                Content="Selected Folders"/>
+            <ScrollViewer
+                x:Name="TreeViewScrollViewer"
+                HorizontalAlignment="Left"
+                Height="400"
+                Width="345">
+                <TreeView
+                    Margin="10,0,10,0"
+                    ClipToBounds="True"
+                    BorderBrush="CornflowerBlue"
+                    BorderThickness="3"
+                    ItemsSource="{Binding RootItems}"
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Stretch"
+                    Height="Auto"
+                    Width="Auto"
+                    PreviewMouseWheel="TreeView_PreviewMouseWheel">
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox IsChecked="{Binding IsChecked}" />
+                                <TextBlock Text="{Binding Name}" Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </ScrollViewer>
+            <Button
+                Name="StartButton"
+                Margin="20,20,30,20"
+                Content="start"
+                ClipToBounds="True"
+                Height="30"
+                Width="80"
+                FontSize="16"
+                FontWeight="Bold"
+                Foreground="Black"
+                Background="SeaGreen"
+                Style="{StaticResource RoundedButton}"
+                HorizontalAlignment="Right"
+                Click="OnStartClick"
             />
         </StackPanel>
     </Grid>

@@ -1,5 +1,7 @@
-﻿using System.IO;
+﻿using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
+using System.Windows.Input;
 using Microsoft.Win32;
 using NFSUAuditFilesWizard.Interfaces;
 using NFSUAuditFilesWizard.Services;
@@ -10,10 +12,13 @@ public partial class MainWindow : Window
 {
     private readonly IPDFCombinerService _pdfCombinerService;
 
-    private List<string> _folderPaths = [];
+    private bool _includeMaster = false;
+    private string _saveLocation = "";
     private List<string> _combinedPds = [];
 
     private const int MaxProgress = 100;
+
+    public ObservableCollection<FileSystemItemViewModel> RootItems { get; set; }
 
     #region default constructor
 
@@ -27,21 +32,26 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         _pdfCombinerService = pdfCombinerService;
+        DataContext = this;
+        RootItems = new ObservableCollection<FileSystemItemViewModel>
+        {
+            FileSystemService.GetFileSystemItems(@$"C:\Programming Projects\Test Data")
+        };
     }
 
     private void OnSelectFoldersClick(object sender, RoutedEventArgs e)
     {
         var dialog = new OpenFolderDialog
         {
-            Multiselect = true,
-            Title = "Select folders"
+            Multiselect = false,
+            Title = "Select folder"
         };
 
         var result = dialog.ShowDialog();
 
         if (result == true)
         {
-            _folderPaths = dialog.FolderNames.ToList();
+            _saveLocation = dialog.FolderName;
         }
     }
 
@@ -50,7 +60,7 @@ public partial class MainWindow : Window
         if (!InputsAreValid())
             return;
 
-        var fullPath = Path.GetFullPath(_folderPaths.First());
+        var fullPath = Path.GetFullPath(_saveLocation);
         var parentDirectory = Path.GetDirectoryName(fullPath);
         var masterFileName = MasterFileNameTextBox.Text;
 
@@ -58,13 +68,14 @@ public partial class MainWindow : Window
 
         try
         {
-            await foreach (var combinedPdf in _pdfCombinerService.CombinePdfsInFolders(_folderPaths))
+            await foreach (var combinedPdf in _pdfCombinerService.CombinePdfsInFolders(RootItems))
             {
                 _combinedPds.Add(combinedPdf);
                 UpdateProgressBar(_combinedPds.Count);
             }
 
-            await _pdfCombinerService.CreateMasterPdf(_combinedPds, masterFileName, parentDirectory);
+            if (_includeMaster)
+                await _pdfCombinerService.CreateMasterPdf(_combinedPds, masterFileName, parentDirectory);
         }
         catch (Exception ex)
         {
@@ -77,25 +88,25 @@ public partial class MainWindow : Window
 
     private void HideProgress()
     {
-        ProgressBar.Visibility = Visibility.Collapsed;
-        SelectFoldersButton.IsEnabled = true;
-        StartButton.IsEnabled = true;
-        MasterFileNameTextBox.IsEnabled = true;
+        // ProgressBar.Visibility = Visibility.Collapsed;
+        // SelectFoldersButton.IsEnabled = true;
+        // StartButton.IsEnabled = true;
+        // MasterFileNameTextBox.IsEnabled = true;
     }
 
     private void ShowProgress()
     {
-        ProgressBar.Visibility = Visibility.Visible;
-        ProgressBar.IsIndeterminate = false;
-        ProgressBar.Value = 0;
-        SelectFoldersButton.IsEnabled = false;
-        StartButton.IsEnabled = false;
-        MasterFileNameTextBox.IsEnabled = false;
+        // ProgressBar.Visibility = Visibility.Visible;
+        // ProgressBar.IsIndeterminate = false;
+        // ProgressBar.Value = 0;
+        // SelectFoldersButton.IsEnabled = false;
+        // StartButton.IsEnabled = false;
+        // MasterFileNameTextBox.IsEnabled = false;
     }
 
     private bool InputsAreValid()
     {
-        if (!_folderPaths.Any())
+        if (_saveLocation == "")
         {
             ShowMessageBox(
                 "Please select at least one folder",
@@ -104,7 +115,7 @@ public partial class MainWindow : Window
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(MasterFileNameTextBox.Text))
+        if (_includeMaster && string.IsNullOrWhiteSpace(MasterFileNameTextBox.Text))
         {
             ShowMessageBox(
                 "Please enter a Master File Name",
@@ -118,7 +129,7 @@ public partial class MainWindow : Window
 
     private void UpdateProgressBar(int count)
     {
-        ProgressBar.Value = (count + 1) * MaxProgress / (double)_folderPaths.Count;
+        // ProgressBar.Value = (count + 1) * MaxProgress / (double)_saveLocation.Count;
     }
 
     private void ShowMessageBox(string message, string caption, MessageBoxImage icon, bool hideProgressBar = false)
@@ -127,5 +138,11 @@ public partial class MainWindow : Window
 
         if (hideProgressBar)
             HideProgress();
+    }
+
+    private void TreeView_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        TreeViewScrollViewer.ScrollToVerticalOffset(TreeViewScrollViewer.VerticalOffset - e.Delta / 3);
+        e.Handled = true;
     }
 }

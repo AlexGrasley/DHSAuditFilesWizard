@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Windows.Controls;
 using iText.Kernel.Pdf;
@@ -9,19 +10,22 @@ namespace NFSUAuditFilesWizard.Services;
 
 public class PDFCombinerService : IPDFCombinerService
 {
-    public async IAsyncEnumerable<string> CombinePdfsInFolders(List<string> folderPaths)
+    public async IAsyncEnumerable<string> CombinePdfsInFolders(
+        ObservableCollection<FileSystemItemViewModel> folderPaths)
     {
-        foreach (var folder in folderPaths)
+        var folders = FileSystemService.FlattenFileSystemItems(folderPaths);
+
+        foreach (var folder in folders)
         {
-            var pdfFiles = Directory.GetFiles(folder, "*.pdf");
-            if (pdfFiles.Length == 0)
+            var pdfFiles = folder.Children;
+            if (pdfFiles.Count == 0)
                 continue;
 
-            var outputFilePath = Path.Combine(folder, $"{Path.GetFileName(folder)}.pdf");
+            var outputFilePath = Path.Combine(folder.Path, $"{Path.GetFileName(folder.Name)}.pdf");
 
             //Don't want to delete existing files, just append date/time to create a new file
             if (Path.Exists(outputFilePath))
-                outputFilePath = Path.Combine(folder, $"{Path.GetFileName(folder)}-{DateTime.Now:yyMMddThhmmss}.pdf");
+                outputFilePath = Path.Combine(folder.Path, $"{Path.GetFileName(folder.Name)}-{DateTime.Now:yyMMddThhmmss}.pdf");
 
             await using (var pdfWriter = new PdfWriter(outputFilePath))
             using (var pdfDocument = new PdfDocument(pdfWriter))
@@ -29,7 +33,7 @@ public class PDFCombinerService : IPDFCombinerService
                 var pdfMerger = new PdfMerger(pdfDocument);
                 foreach (var pdfFile in pdfFiles)
                 {
-                    using var inputPdf = new PdfDocument(new PdfReader(pdfFile));
+                    using var inputPdf = new PdfDocument(new PdfReader(pdfFile.Path));
                     pdfMerger.Merge(inputPdf, 1, inputPdf.GetNumberOfPages());
                 }
             }
