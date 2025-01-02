@@ -14,7 +14,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="10">
+                            CornerRadius="4">
                             <ScrollViewer x:Name="PART_ContentHost"/>
                         </Border>
                     </ControlTemplate>
@@ -29,8 +29,10 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="0"
-                            CornerRadius="10">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            CornerRadius="4">
+                            <ContentPresenter
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -48,21 +50,32 @@
             Grid.Column="0"
             Width="300"
             VerticalAlignment="Top">
-            <Button
-                Name="SelectSaveFolderButton"
-                Margin="0,10,0,10"
-                Content="Save Loc"
-                FontSize="16"
-                FontWeight="Bold"
-                Foreground="WhiteSmoke"
-                ClipToBounds="True"
-                Height="30"
-                Width="150"
-                Background="SteelBlue"
-                Style="{StaticResource RoundedButton}"
-                HorizontalAlignment="Left"
-                Click="OnSelectFoldersClick"
-            />
+            <StackPanel
+                Orientation="Horizontal">
+                <Button
+                    Name="SelectSaveFolderButton"
+                    Margin="0,10,0,10"
+                    Content="..."
+                    FontSize="16"
+                    FontWeight="Bold"
+                    Foreground="WhiteSmoke"
+                    ClipToBounds="True"
+                    Height="30"
+                    Width="40"
+                    Background="SteelBlue"
+                    Style="{StaticResource RoundedButton}"
+                    HorizontalAlignment="Left"
+                    Click="OnSelectFoldersClick"
+                />
+                <Label
+                    x:Name="SaveFolderLabel"
+                    Margin="10,0,0,0"
+                    VerticalContentAlignment="Center"
+                    HorizontalContentAlignment="Left"
+                    Width="275"
+                    Height="30"
+                    Content="{Binding SaveLocation}"/>
+            </StackPanel>
             <StackPanel
                 Orientation="Horizontal">
                 <Label

@@ -1,4 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -32,7 +34,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         _pdfCombinerService = pdfCombinerService;
-        DataContext = this;
+        DataContext = new SaveLocationModel();
         RootItems = new ObservableCollection<FileSystemItemViewModel>
         {
             FileSystemService.GetFileSystemItems(@$"C:\Programming Projects\Test Data")
@@ -51,7 +53,8 @@ public partial class MainWindow : Window
 
         if (result == true)
         {
-            _saveLocation = dialog.FolderName;
+            if (DataContext is SaveLocationModel location)
+                location.SaveLocation = dialog.FolderName;
         }
     }
 
@@ -60,7 +63,9 @@ public partial class MainWindow : Window
         if (!InputsAreValid())
             return;
 
-        var fullPath = Path.GetFullPath(_saveLocation);
+        var saveLocation = ((SaveLocationModel)DataContext).SaveLocation;
+
+        var fullPath = Path.GetFullPath(saveLocation);
         var parentDirectory = Path.GetDirectoryName(fullPath);
         var masterFileName = MasterFileNameTextBox.Text;
 
@@ -83,7 +88,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        ShowMessageBox("Done","", MessageBoxImage.None, hideProgressBar: true);
+        OpenFileExplorer(saveLocation);
     }
 
     private void HideProgress()
@@ -106,7 +111,7 @@ public partial class MainWindow : Window
 
     private bool InputsAreValid()
     {
-        if (_saveLocation == "")
+        if (string.IsNullOrWhiteSpace(_saveLocation))
         {
             ShowMessageBox(
                 "Please select at least one folder",
@@ -144,5 +149,15 @@ public partial class MainWindow : Window
     {
         TreeViewScrollViewer.ScrollToVerticalOffset(TreeViewScrollViewer.VerticalOffset - e.Delta / 3);
         e.Handled = true;
+    }
+
+    private void OpenFileExplorer(string path)
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = path,
+            UseShellExecute = true,
+            Verb = "open"
+        });
     }
 }
