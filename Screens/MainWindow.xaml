@@ -74,47 +74,14 @@
                     HorizontalContentAlignment="Left"
                     Width="275"
                     Height="30"
-                    Content="{Binding SaveLocation}"/>
+                    Content="{Binding SaveLocationModel.SaveLocation}"/>
             </StackPanel>
-            <StackPanel
-                Orientation="Horizontal">
-                <Label
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    Content="Include Master File"
-                    />
-                <CheckBox
-                    x:Name="IncludeMasterCheckBox"
-                    Margin="5"
-                    Padding="0"
-                    VerticalAlignment="Center"
-                    IsChecked="{Binding _includeMaster}"/>
-            </StackPanel>
-            <StackPanel
-                x:Name="MasterFileStackPanel"
-                Visibility="{Binding IsChecked, ElementName=IncludeMasterCheckBox, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Label
-                    Content="Master File Name"
-                    Height="24"
-                    Margin="0"
-                    Padding="0"
-                    Foreground="Black"
-                    HorizontalAlignment="Left"
-                />
-                <TextBox
-                    Name="MasterFileNameTextBox"
-                    Margin="0"
-                    Style="{StaticResource RoundedTextBox}"
-                    Height="30"
-                    Width="250"
-                    MaxLength="256"
-                    TabIndex="0"
-                    HorizontalAlignment="Left"
-                    TextAlignment="Left"
-                    FontSize="16"
-                    Background="WhiteSmoke"
-                />
-            </StackPanel>
+            <ListBox
+                x:Name="ResultsListBox"
+                ItemsSource="{Binding CombinedPdfs}"
+                Height="300"
+                VerticalAlignment="Bottom">
+            </ListBox>
         </StackPanel>
         <StackPanel
             Grid.Column="1"

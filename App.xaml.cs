@@ -23,7 +23,7 @@ namespace NFSUAuditFilesWizard
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IPDFCombinerService, PDFCombinerService>();
+            services.AddSingleton<IPdfCombinerService, PdfCombinerService>();
             services.AddSingleton<MainWindow>();
         }
     }

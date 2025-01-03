@@ -4,10 +4,11 @@ using NFSUAuditFilesWizard.Interfaces;
 
 namespace NFSUAuditFilesWizard.Services;
 
-public class DefaultPDFCombinerService : IPDFCombinerService
+public class DefaultPdfCombinerService : IPdfCombinerService
 {
     public async IAsyncEnumerable<string> CombinePdfsInFolders(
-        ObservableCollection<FileSystemItemViewModel> folderPaths)
+        ObservableCollection<FileSystemItemViewModel> folderPaths,
+        string saveLocation)
     {
         yield break;
     }

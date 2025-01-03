@@ -3,6 +3,7 @@
 public class SaveLocationModel : INotifyPropertyChanged
 {
     private string _saveLocation;
+    private bool _isSet;
     public string SaveLocation
     {
         get => string.IsNullOrWhiteSpace(_saveLocation)
@@ -14,10 +15,14 @@ public class SaveLocationModel : INotifyPropertyChanged
             if (_saveLocation != value)
             {
                 _saveLocation = value;
+                _isSet = true;
                 OnPropertyChanged(nameof(SaveLocation));
             }
         }
     }
+
+    public bool IsSet => _isSet;
+
 
     public event PropertyChangedEventHandler PropertyChanged;
 

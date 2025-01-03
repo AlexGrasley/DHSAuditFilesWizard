@@ -2,43 +2,57 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Microsoft.Win32;
 using NFSUAuditFilesWizard.Interfaces;
 using NFSUAuditFilesWizard.Services;
 
 namespace NFSUAuditFilesWizard.Screens;
 
-public partial class MainWindow : Window
+public partial class MainWindow : Window, INotifyPropertyChanged
 {
-    private readonly IPDFCombinerService _pdfCombinerService;
+    private readonly IPdfCombinerService _pdfCombinerService;
+    private ObservableCollection<FileSystemItemViewModel> _rootItems;
+    public event PropertyChangedEventHandler PropertyChanged;
 
-    private bool _includeMaster = false;
-    private string _saveLocation = "";
-    private List<string> _combinedPds = [];
+    public bool IncludeMaster { get; set; } = false;
+    public ObservableCollection<FileSystemItemViewModel> RootItems
+    {
+        get => _rootItems;
+        set
+        {
+            _rootItems = value;
+            OnPropertyChanged();
+        }
+    }
 
-    private const int MaxProgress = 100;
+    protected void OnPropertyChanged([CallerMemberName] string name = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
 
-    public ObservableCollection<FileSystemItemViewModel> RootItems { get; set; }
+
+    public ObservableCollection<string> CombinedPdfs { get; set; } = [];
+    public SaveLocationModel SaveLocationModel { get; set; } = new SaveLocationModel();
 
     #region default constructor
 
-    public MainWindow() : this(new DefaultPDFCombinerService())
+    public MainWindow() : this(new DefaultPdfCombinerService())
     {
     }
 
     #endregion
 
-    public MainWindow(IPDFCombinerService pdfCombinerService)
+    public MainWindow(IPdfCombinerService pdfCombinerService)
     {
         InitializeComponent();
         _pdfCombinerService = pdfCombinerService;
-        DataContext = new SaveLocationModel();
-        RootItems = new ObservableCollection<FileSystemItemViewModel>
-        {
-            FileSystemService.GetFileSystemItems(@$"C:\Programming Projects\Test Data")
-        };
+        DataContext = this;
+        RootItems = [];
+        OpenFolderDialog();
     }
 
     private void OnSelectFoldersClick(object sender, RoutedEventArgs e)
@@ -53,9 +67,29 @@ public partial class MainWindow : Window
 
         if (result == true)
         {
-            if (DataContext is SaveLocationModel location)
-                location.SaveLocation = dialog.FolderName;
+            SaveLocationModel.SaveLocation = dialog.FolderName;
         }
+    }
+
+    private void OpenFolderDialog()
+    {
+        var dialog = new OpenFolderDialog
+        {
+            Multiselect = false,
+            Title = "Open Folder"
+        };
+
+        var result = dialog.ShowDialog();
+
+        if (result == true)
+        {
+            RootItems = new ObservableCollection<FileSystemItemViewModel>
+            {
+                FileSystemService.GetFileSystemItems(dialog.FolderName)
+            };
+        }
+
+
     }
 
     private async void OnStartClick(object sender, RoutedEventArgs e)
@@ -63,55 +97,41 @@ public partial class MainWindow : Window
         if (!InputsAreValid())
             return;
 
-        var saveLocation = ((SaveLocationModel)DataContext).SaveLocation;
+        await RunCombinePdfs();
+    }
 
-        var fullPath = Path.GetFullPath(saveLocation);
-        var parentDirectory = Path.GetDirectoryName(fullPath);
-        var masterFileName = MasterFileNameTextBox.Text;
+    private async Task RunCombinePdfs()
+    {
+        var fullPath = Path.GetFullPath(SaveLocationModel.SaveLocation);
 
-        ShowProgress();
+        var progress = new Progress<string>(combinedPdf =>
+        {
+            CombinedPdfs.Add(combinedPdf);
+            AllowUIToUpdate();
+        });
 
         try
         {
-            await foreach (var combinedPdf in _pdfCombinerService.CombinePdfsInFolders(RootItems))
+            await Task.Run(async () =>
             {
-                _combinedPds.Add(combinedPdf);
-                UpdateProgressBar(_combinedPds.Count);
-            }
-
-            if (_includeMaster)
-                await _pdfCombinerService.CreateMasterPdf(_combinedPds, masterFileName, parentDirectory);
+                await foreach (var combinedPdf in _pdfCombinerService.CombinePdfsInFolders(RootItems, SaveLocationModel.SaveLocation))
+                {
+                    ((IProgress<string>)progress).Report(combinedPdf);
+                }
+            });
         }
         catch (Exception ex)
         {
-            ShowMessageBox(ex.Message, "Error", MessageBoxImage.Error, true);
+            ShowMessageBox(ex.Message, "Error", MessageBoxImage.Error);
             return;
         }
 
-        OpenFileExplorer(saveLocation);
-    }
-
-    private void HideProgress()
-    {
-        // ProgressBar.Visibility = Visibility.Collapsed;
-        // SelectFoldersButton.IsEnabled = true;
-        // StartButton.IsEnabled = true;
-        // MasterFileNameTextBox.IsEnabled = true;
-    }
-
-    private void ShowProgress()
-    {
-        // ProgressBar.Visibility = Visibility.Visible;
-        // ProgressBar.IsIndeterminate = false;
-        // ProgressBar.Value = 0;
-        // SelectFoldersButton.IsEnabled = false;
-        // StartButton.IsEnabled = false;
-        // MasterFileNameTextBox.IsEnabled = false;
+        OpenFileExplorer(SaveLocationModel.SaveLocation);
     }
 
     private bool InputsAreValid()
     {
-        if (string.IsNullOrWhiteSpace(_saveLocation))
+        if (!SaveLocationModel.IsSet)
         {
             ShowMessageBox(
                 "Please select at least one folder",
@@ -120,29 +140,13 @@ public partial class MainWindow : Window
             return false;
         }
 
-        if (_includeMaster && string.IsNullOrWhiteSpace(MasterFileNameTextBox.Text))
-        {
-            ShowMessageBox(
-                "Please enter a Master File Name",
-                "Missing Master File Name",
-                MessageBoxImage.Warning);
-            return false;
-        }
-
         return true;
     }
 
-    private void UpdateProgressBar(int count)
-    {
-        // ProgressBar.Value = (count + 1) * MaxProgress / (double)_saveLocation.Count;
-    }
-
-    private void ShowMessageBox(string message, string caption, MessageBoxImage icon, bool hideProgressBar = false)
+    private void ShowMessageBox(string message, string caption, MessageBoxImage icon)
     {
         MessageBox.Show(message, caption, MessageBoxButton.OK, icon);
 
-        if (hideProgressBar)
-            HideProgress();
     }
 
     private void TreeView_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -159,5 +163,20 @@ public partial class MainWindow : Window
             UseShellExecute = true,
             Verb = "open"
         });
+    }
+
+    private static void AllowUIToUpdate()
+    {
+        DispatcherFrame frame = new();
+        // DispatcherPriority set to Input, the highest priority
+        Dispatcher.CurrentDispatcher.Invoke(DispatcherPriority.Input, new DispatcherOperationCallback(delegate (object parameter)
+        {
+            frame.Continue = false;
+            Thread.Sleep(20); // Stop all processes to make sure the UI update is perform
+            return null;
+        }), null);
+        Dispatcher.PushFrame(frame);
+        // DispatcherPriority set to Input, the highest priority
+        Application.Current.Dispatcher.Invoke(DispatcherPriority.Input, new Action(delegate { }));
     }
 }
