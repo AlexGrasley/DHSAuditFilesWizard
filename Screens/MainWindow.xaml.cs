@@ -16,6 +16,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 {
     private readonly IPdfCombinerService _pdfCombinerService;
     private ObservableCollection<FileSystemItemViewModel> _rootItems;
+    private const string LoadingString = "Loading...";
     public event PropertyChangedEventHandler PropertyChanged;
 
     public bool IncludeMaster { get; set; } = false;
@@ -87,9 +88,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             {
                 FileSystemService.GetFileSystemItems(dialog.FolderName)
             };
+            SaveLocationModel.SaveLocation = dialog.FolderName;
         }
-
-
     }
 
     private async void OnStartClick(object sender, RoutedEventArgs e)
@@ -97,7 +97,19 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         if (!InputsAreValid())
             return;
 
+        StartButton.IsEnabled = false;
+        SelectSaveFolderButton.IsEnabled = false;
+        FileTreeView.IsEnabled = false;
+
+        CombinedPdfs.Add(LoadingString);
+
         await RunCombinePdfs();
+
+        CombinedPdfs.Remove(LoadingString);
+
+        StartButton.IsEnabled = true;
+        SelectSaveFolderButton.IsEnabled = true;
+        FileTreeView.IsEnabled = true;
     }
 
     private async Task RunCombinePdfs()
@@ -106,7 +118,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         var progress = new Progress<string>(combinedPdf =>
         {
+            CombinedPdfs.Remove(LoadingString);
             CombinedPdfs.Add(combinedPdf);
+            CombinedPdfs.Add(LoadingString);
             AllowUIToUpdate();
         });
 

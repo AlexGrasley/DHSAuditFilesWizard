@@ -37,10 +37,26 @@ public class PdfCombinerService : IPdfCombinerService
             using (var pdfDocument = new PdfDocument(pdfWriter))
             {
                 var pdfMerger = new PdfMerger(pdfDocument, GetMergerProperties());
+                var rootOutline = pdfDocument.GetOutlines(false);
+
+                var pages = 1;
                 foreach (var pdfFile in pdfFiles)
                 {
                     using var inputPdf = new PdfDocument(new PdfReader(pdfFile.Path));
-                    pdfMerger.Merge(inputPdf, 1, inputPdf.GetNumberOfPages());
+                    var pdfFileName = Path.GetFileNameWithoutExtension(pdfFile.Name);
+                    var inputOutline = inputPdf.GetOutlines(true);
+                    if (inputOutline?.GetDestination() == null)
+                    {
+                        inputOutline?.AddDestination(PdfExplicitDestination.CreateFit(inputPdf.GetFirstPage()));
+                    }
+
+                    var subPages = inputPdf.GetNumberOfPages();
+                    pdfMerger.Merge(inputPdf, 1, subPages);
+
+                    var link = rootOutline.AddOutline(pdfFileName);
+                    link.AddDestination(PdfExplicitDestination.CreateFit(pdfDocument.GetPage(pages)));
+
+                    pages += subPages;
                 }
             }
 
@@ -51,6 +67,7 @@ public class PdfCombinerService : IPdfCombinerService
 
         await foreach (var result in channel.Reader.ReadAllAsync())
         {
+            await Task.Delay(5000);
             yield return result;
         }
     }
@@ -90,7 +107,6 @@ public class PdfCombinerService : IPdfCombinerService
             pdfMerger.Merge(inputPdf, 1, subPages);
 
             var link = rootOutline.AddOutline(pdfFileName);
-            CopyOutline(inputOutline, link, pdfDocument);
             link.AddDestination(PdfExplicitDestination.CreateFit(pdfDocument.GetPage(pages)));
 
             pages += subPages;

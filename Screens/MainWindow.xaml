@@ -6,22 +6,19 @@
         mc:Ignorable="d"
         Title="NFSU Audit Files Wizard" Height="550" Width="700">
     <Window.Resources>
-        <Style x:Key="RoundedTextBox" TargetType="TextBox">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
-                            <ScrollViewer x:Name="PART_ContentHost"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <Style x:Key="TreeViewControl" TargetType="TreeView">
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.5"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
         <Style x:Key="RoundedButton" TargetType="Button">
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.5"/>
+                </Trigger>
+            </Style.Triggers>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -98,6 +95,8 @@
                 Height="400"
                 Width="345">
                 <TreeView
+                    x:Name="FileTreeView"
+                    Style="{StaticResource TreeViewControl}"
                     Margin="10,0,10,0"
                     ClipToBounds="True"
                     BorderBrush="CornflowerBlue"
@@ -108,8 +107,13 @@
                     Height="Auto"
                     Width="Auto"
                     PreviewMouseWheel="TreeView_PreviewMouseWheel">
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Setter Property="IsExpanded" Value="True" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
                     <TreeView.ItemTemplate>
-                        <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                        <HierarchicalDataTemplate ItemsSource="{Binding Children}"  >
                             <StackPanel Orientation="Horizontal">
                                 <CheckBox IsChecked="{Binding IsChecked}" />
                                 <TextBlock Text="{Binding Name}" Margin="5,0,0,0"/>
