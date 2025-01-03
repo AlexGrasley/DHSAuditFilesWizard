@@ -2,8 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Threading.Channels;
-using System.Windows.Shapes;
-using iText.Forms;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Navigation;
 using iText.Kernel.Utils;
@@ -67,7 +65,6 @@ public class PdfCombinerService : IPdfCombinerService
 
         await foreach (var result in channel.Reader.ReadAllAsync())
         {
-            await Task.Delay(5000);
             yield return result;
         }
     }
